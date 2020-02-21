@@ -3,7 +3,8 @@
 
 - Los servidores que necesites para realizar la práctica serán los del cloud: salmorejo (servidor web) y croqueta (servidor dns y ldap).
 
-Vamos a realizar un sistema de correo para el dominio tudominio.gonzalonazareno.org, cuyo servidor DNS lo administras en tu propio servidor DNS. Tienes que comunicar el nombre de dominio al profesor para configurar el servidor de correos del departamento. Instala postfix y comprueba que recibe correo directamente desde un equipo de Internet (hotmail, gmail, etc.). Configura tu servidor de correos para que use a babuino-smtp como relay y comprueba que puedes enviar correos.
+Vamos a realizar un sistema de correo para el dominio tudominio.gonzalonazareno.org, cuyo servidor DNS lo adm
+inistras en tu propio servidor DNS. Tienes que comunicar el nombre de dominio al profesor para configurar el servidor de correos del departamento. Instala postfix y comprueba que recibe correo directamente desde un equipo de Internet (hotmail, gmail, etc.). Configura tu servidor de correos para que use a babuino-smtp como relay y comprueba que puedes enviar correos.
 
 **Documenta en redmine una prueba de funcionamiento, donde envíes desde tu servidor local al exterior. Muestra el log donde se vea el envío. Muestra el correo que has recibido.**
 En el fichero de configuracion del DNS se va a añadir la siguiente línea:
@@ -138,6 +139,18 @@ debian@croqueta:~$ sudo apt install dovecot-imapd dovecot-pop3d dovecot-core
 Se añaden la siguiente línea en el fichero de configuración de postfix indicando las direcciones de los clientes que se van a permitir:
 ~~~
 mynetworks = 127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128 10.0.0.0/24 172.22.0.0/16
+mailbox_command =
+home_mailbox = Maildir/
+~~~
+
+También se configura el fichero **/etc/dovecot/conf.d/10-auth.conf**:
+~~~
+disable_plaintext_auth = no 
+~~~
+
+Y se cambia el fichero **/etc/dovecot/conf.d/10-mail.conf**:
+~~~ 
+mail_location = maildir:~/Maildir             
 ~~~
 
 Y se modifica el fichero de configuración del DNS:
@@ -148,69 +161,68 @@ imap            IN  CNAME   croqueta
 
 > Se necesita que los puertos de POP (110) e IMAP (143) estén abiertos.
 
+Y se reinician todos los servicios (postfix, dovecot, DNS):
+~~~
+debian@croqueta:~$ sudo rndc reload
+debian@croqueta:~$ sudo systemctl restart postfix
+debian@croqueta:~$ sudo systemctl restart dovecot.service 
+~~~
+
+
+**Documenta en redmine una prueba de funcionamiento, donde envíes desde tu cliente de correos al exterior. ¿Cómo se llama el servidor para enviar el correo? (Muestra la configuración).**
 A continuación, desde otra máquina, se va a acceder al correo desde **Evolution**. En la pestaña **Archivo** > **Nuevo** > **Cuenta de Correo** y aparece una nueva ventana donde indicar los datos del correo:
 ![evolution](images/cimg.png)
 ![evolution](images/dimg.png)
 ![evolution](images/eimg.png)
 
+Y se envía un correo:
+![evolution](images/fimg.png)
 
-*
-*
-*
-*
-*
-*
-*
-*
-*
-*PREGUNTAR: por qué desde mi pc no me deja enviar correo fuera, pero si le llegan al ale??
-
-
-**Documenta en redmine una prueba de funcionamiento, donde envíes desde tu cliente de correos al exterior. ¿Cómo se llama el servidor para enviar el correo? (Muestra la configuración).**
-
-
-
+Así llega al correo de gmail:
+![evolution](images/gimg.png)
 
 
 **Documenta en redmine una prueba de funcionamiento, donde recibas un correo desde el exterior (gmail, hotmail,…) y lo leas en tu cliente de correo. Utiliza el protocolo POP. ¿Cómo se llama el servidor para enviar el correo? (Muestra la configuración). Muestra una prueba de funcionamiento de cómo funciona el protocolo POP.**
+Ahora se va a enviar un correo desde gmail:
+![evolution](images/iimg.png)
+
+En Evolution se pulsa el botón Enviar/Recibir, donde se pedirá la contraseña del usuario.
+![evolution](images/himg.png)
+![evolution](images/jimg.png)
+![evolution](images/kimg.png)
 
 **Documenta en redmine una prueba de funcionamiento, donde recibas un correo desde el exterior (gmail, hotmail,…) y lo leas en tu cliente de correo. Utiliza el protocolo IMAP. ¿Cómo se llama el servidor para enviar el correo? (Muestra la configuración). Muestra una prueba de funcionamiento de cómo funciona el protocolo IMAP.**
 
-Vamos a comprobar como los procesos del servidor pueden mandar correos para informar sobre su estado. Por ejemplo cada vez que se ejecuta una tarea cron podemos enviar un correo informando del resultado. Normalmente estos correos se mandan al usuario root del servidor, para ello:
+El protocolo POP guarda los correos recibidos en el directorio de correos donde se ha indicado anteriormente /new. Cuando se descargan esos correos en Evolution estos desaparecen de este direcorio:
+- Antes de descargar los correos:
+~~~
+debian@croqueta:~$ ls Maildir/new/
+1582277459.Vfe01I21f10M926773.croqueta
+~~~
 
-$ crontab -e
+- Después de descargar los correos:
+~~~
+debian@croqueta:~$ ls Maildir/new/
+debian@croqueta:~$ ls -l Maildir/cur/
+total 0
+~~~
 
-E indico donde se envía el correo:
+A continuacion, se va a configurar Evolution con IMAP para probar que el comportameinto tras la descarga de los correos es diferente.
 
-MAILTO = root
+Se añade una nueva cuenta como antes pero en vez de POP se indica IMAP:
+![evolution](images/limg.png)
 
-Puedes poner alguna tarea en el cron para ver como se mandan correo.
 
-Posteriormente usando alias y redirecciones podemos hacer llegar esos correos a nuestro correo personal.
+Se envía el correo:
+![evolution](images/mimg.png)
 
-    Tarea 6 (2 puntos)(Obligatorio): Configura el cron para enviar correo al usuario root. Comprueba que están llegando esos correos al root. Crea un nuevo alias para que se manden a un usuario sin privilegios. Comprueban que llegan a ese usuario. Por último crea una redirección para enviar esos correo a tu correo de gmail.
+Se recibe en evolution:
+![evolution](images/nimg.png)
 
-Instala un webmail (roundcube, horde, …) para gestionar el correo del equipo mediante una interfaz web. Instala y configura correctamente un sistema de filtrado de virus y spam utilizando amavis, clamav y spamassasin .
-
-    Tarea 7 (3 puntos): Muestra al profesor el envío y recepción de correos utilizando el webmail.
-    Tarea 8 (3 puntos): Muestra al profesor el funcionamiento del sistema de filtrado de virus y spam.
-
-Tarea adicional: Configuración de usuarios virtuales con LDAPPermalink
-
-Instala un esquema adecuado para usuarios de postfix en LDAP y crea un script que reciba un nombre de usuario y añade un nuevo registro al LDAP:
-
-    El dn debes ajustarlo a la base a la de tu directorio
-    Cada entrada incluye un objectClass y atributos adecuados para postfix
-    El atributo mail es del tipo usuario@dominio
-    El buzón de cada usuario está en formato Maildir
-    El atributo userPassword es un hash SSHA del uid del usuario
-
-    Tarea 9 (4 puntos): Documenta en redmine la configuración realizada. Y realiza una prueba de funcionamiento al profesor.
-
-Tarea adicional: Configuración de seguridad para SMTP, POP e IMAPPermalink
-
-En el servidor de clase, configura postfix para que las conexiones al servidor SMTP, POP e IMAP sean seguras (SSL).
-
-    Tarea 10 (2 puntos): Documenta en redmine la configuración realizada para que nuestro servidor SMTP sea seguro. Indica alguna prueba de funcionamiento .
-    Tarea 11 (3 puntos): Documenta en redmine la configuración realizada para que nuestro servidor POP o IMAP sea seguro. Indica alguna prueba de funcionamiento.
-
+Y se comprueba que en Mail/cur/ aparecen los mesajes descargados en Evolution:
+~~~
+debian@croqueta:~$ ls -l Maildir/cur/
+total 8
+-rw------- 1 debian debian 3138 Feb 21 10:07 1582279626.Vfe01I21f10M647841.croqueta:2,S
+-rw------- 1 debian debian 3144 Feb 21 10:10 1582279821.Vfe01I21f0dM770200.croqueta:2,
+~~~
