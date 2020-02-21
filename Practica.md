@@ -226,3 +226,91 @@ total 8
 -rw------- 1 debian debian 3138 Feb 21 10:07 1582279626.Vfe01I21f10M647841.croqueta:2,S
 -rw------- 1 debian debian 3144 Feb 21 10:10 1582279821.Vfe01I21f0dM770200.croqueta:2,
 ~~~
+
+
+**Vamos a comprobar como los procesos del servidor pueden mandar correos para informar sobre su estado. Por ejemplo cada vez que se ejecuta una tarea cron podemos enviar un correo informando del resultado. Normalmente estos correos se mandan al usuario root del servidor, para ello:**
+
+$ crontab -e
+
+E indico donde se envía el correo:
+
+MAILTO = root
+
+Puedes poner alguna tarea en el cron para ver como se mandan correo.
+
+Posteriormente usando alias y redirecciones podemos hacer llegar esos correos a nuestro correo personal.
+
+**Configura el cron para enviar correo al usuario root. Comprueba que están llegando esos correos al root. Crea un nuevo alias para que se manden a un usuario sin privilegios. Comprueban que llegan a ese usuario. Por último crea una redirección para enviar esos correo a tu correo de gmail.**
+
+Se crea un script en **/root/scriptmail.sh** que muestra el uso de la RAM:
+~~~
+#!/bin/sh
+free -b
+~~~
+
+Y se le otorgan los permios oportunos al script:
+~~~
+root@croqueta:~# chmod 744 scriptmail.sh 
+~~~
+
+Se configura crontab:
+~~~
+root@croqueta:/home/debian# crontab -e
+crontab: installing new crontab
+~~~
+
+~~~
+MAILTO = root
+* * * * * /root/scriptmail.sh
+~~~
+
+Y el correo aparece la siguiente manera:
+~~~
+root@croqueta:~# cat Maildir/new/1582283401.Vfe01I21f1dM763849.croqueta 
+Return-Path: <root@paloma.gonzalonazareno.org>
+X-Original-To: root
+Delivered-To: root@paloma.gonzalonazareno.org
+Received: by croqueta.paloma.gonzalonazareno.org (Postfix, from userid 0)
+	id B650221F1E; Fri, 21 Feb 2020 11:10:01 +0000 (UTC)
+From: root@paloma.gonzalonazareno.org (Cron Daemon)
+To: root@paloma.gonzalonazareno.org
+Subject: Cron <root@croqueta> /root/scriptmail.sh
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+X-Cron-Env: <MAILTO=root>
+X-Cron-Env: <SHELL=/bin/sh>
+X-Cron-Env: <HOME=/root>
+X-Cron-Env: <PATH=/usr/bin:/bin>
+X-Cron-Env: <LOGNAME=root>
+Message-Id: <20200221111001.B650221F1E@croqueta.paloma.gonzalonazareno.org>
+Date: Fri, 21 Feb 2020 11:10:01 +0000 (UTC)
+
+              total        used        free      shared  buff/cache   available
+Mem:     1037578240   196870144   562204672    10739712   278503424   680992768
+Swap:             0           0           0
+~~~
+
+Para redireccionar los correos al usuario debian se edita el fichero **/etc/aliases**:
+~~~
+root: debian
+~~~
+
+Y se ejecuta la instrucción **newaliases**:
+~~~
+root@croqueta:~# newaliases
+~~~
+
+Y se comprueba que ha llegao el correo al usuario debian:
+![cron](images/ñimg.png)
+![cron](images/oimg.png)
+
+Por último, para que se envíe a nuestro correo de gmail se crea el fichero **/home/debian/.forward** con el correo de destino:
+~~~
+palomagarciacampon08@gmail.com
+~~~
+
+![cron](images/pimg.png)
+
+
+
