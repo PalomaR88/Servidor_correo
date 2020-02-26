@@ -64,7 +64,7 @@ Se selecciona el tipo de configuración Internet Site:
  │                                                                     │ 
  │ System mail name:                                                   │ 
  │                                                                     │ 
- │ croqueta.paloma.gonzalonazareno.org________________________________ │ 
+ │ paloma.gonzalonazareno.org_________________________________________ │ 
  │                                                                     │ 
  │                  <Ok>                      <Cancel>                 │ 
  │                                                                     │ 
@@ -75,7 +75,7 @@ El nombre del correo está en **/etc/mailname** y los ficheros de configuración
 
 En **/etc/postfix/main.cf** se configuran las siguinetes líneas:
 ~~~
-myhostname = croqueta.paloma.gonzalonazareno.org
+myhostname = paloma.gonzalonazareno.org
 relayhost = babuino-smtp.gonzalonazareno.org
 ~~~
 
@@ -104,7 +104,7 @@ Feb 20 17:36:01 croqueta postfix/smtpd[2991]: B999C21C14: client=babuino-smtp.go
 Feb 20 17:36:01 croqueta postfix/cleanup[2999]: B999C21C14: message-id=<CAN7Hy62iAfUHxnQuhPpwYy8wzhPEq1yic_U3x5Af5qE7s6rKsQ@mail.gmail.com>
 Feb 20 17:36:01 croqueta postfix/qmgr[14980]: B999C21C14: from=<palomagarciacampon08@gmail.com>, size=5962, nrcpt=1 (queue active)
 Feb 20 17:36:01 croqueta postfix/smtpd[2991]: disconnect from babuino-smtp.gonzalonazareno.org[192.168.203.3] ehlo=1 mail=1 rcpt=1 data=1 quit=1 commands=5
-Feb 20 17:36:01 croqueta postfix/local[3000]: B999C21C14: to=<debian@croqueta.paloma.gonzalonazareno.org>, relay=local, delay=0.17, delays=0.1/0.01/0/0.06, dsn=2.0.0, status=sent (delivered to mailbox)
+Feb 20 17:36:01 croqueta postfix/local[3000]: B999C21C14: to=<debian@paloma.gonzalonazareno.org>, relay=local, delay=0.17, delays=0.1/0.01/0/0.06, dsn=2.0.0, status=sent (delivered to mailbox)
 Feb 20 17:36:01 croqueta postfix/qmgr[14980]: BA53321C14: removed
 ~~~
 
@@ -114,7 +114,7 @@ From: Paloma Garcia <palomagarciacampon08@gmail.com>
 Date: Thu, 20 Feb 2020 18:47:51 +0100
 Message-ID: <CAN7Hy60Fe63Y_r-dH0twUV0fd0uWYqnMe1nYiWk5rX9-wwB+-Q@mail.gmail.com>
 Subject: Respuesta
-To: Debian <debian@croqueta.paloma.gonzalonazareno.org>
+To: Debian <debian@paloma.gonzalonazareno.org>
 Content-Type: multipart/alternative; boundary="000000000000a780b9059f0581db"
 Status: O
 X-UID: 7
